@@ -19,7 +19,7 @@ top_dir = '/Volumes/disks/Will_George/Data/'
 targ_name = 'DGTau'
 run = 'p1' # # tag used in the wtfx ms filename, if required
 tag= 'B4_hi'
-cf_date = '2026-06-15' # date of the casa_fit
+cf_date = '2026-06-16' # date of the casa_fit
 wt_date = '2026-06-15' # date of statwt copy 
 shapes = ['G'] # 'G' or 'D' depending on whether you want the Gaussian or disk fit
 
@@ -118,8 +118,8 @@ for shape in shapes:
     realax = fig.add_subplot(gs[0:2, 0])
     imgax = fig.add_subplot(gs[2, 0])
 
-    realax.errorbar(deprjvs_wtfx.rho_uv, abs(deprjvs_wtfx.vis_prof), yerr = deprjvs_wtfx.err_std, fmt = '.', label = 'Data')
-    realax.plot(deprjvs_model.rho_uv, abs(deprjvs_model.vis_prof), '-', color = 'tab:red', label = 'Model')
+    realax.errorbar(deprjvs_wtfx.rho_uv, deprjvs_wtfx.vis_prof, yerr = deprjvs_wtfx.err_std, fmt = '.', label = 'Data')
+    realax.plot(deprjvs_model.rho_uv, deprjvs_model.vis_prof, '-', color = 'tab:red', label = 'Model')
 
     realax.axhline(y=0, color='k', linestyle='--', linewidth=1)
 
