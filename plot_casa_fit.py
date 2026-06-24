@@ -16,12 +16,6 @@ from targets_dict import targ as targ_dict
 
 top_dir = '/Volumes/disks/Will_George/Data/'
 
-targ_name = 'DGTau'
-run = 'p1' # # tag used in the wtfx ms filename, if required
-tag= 'B4_hi'
-cf_date = '2026-06-16' # date of the casa_fit
-wt_date = '2026-06-15' # date of statwt copy 
-shapes = ['G'] # 'G' or 'D' depending on whether you want the Gaussian or disk fit
 targ_name = 'CYTau'
 run = 'p1' # # tag used in the wtfx ms filename, if required
 tag= 'B4_hi'
