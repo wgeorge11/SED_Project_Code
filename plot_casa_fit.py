@@ -22,6 +22,12 @@ tag= 'B4_hi'
 cf_date = '2026-06-16' # date of the casa_fit
 wt_date = '2026-06-15' # date of statwt copy 
 shapes = ['G'] # 'G' or 'D' depending on whether you want the Gaussian or disk fit
+targ_name = 'CYTau'
+run = 'p1' # # tag used in the wtfx ms filename, if required
+tag= 'B4_hi'
+cf_date = '2026-06-18' # date of the casa_fit
+wt_date = '2026-06-18' # date of statwt copy 
+shapes = ['D'] # 'G' or 'D' depending on whether you want the Gaussian or disk fit
 
 
 # ----------- Change above this point for each disk ---------- 
@@ -91,6 +97,29 @@ for shape in shapes:
 
     #Deproject the data based on the fit
     deprjvs_wtfx = deproject_vis(wtfx_ev, bins = np.arange(0, 2500, 25), incl = inclination, PA = pos_angle, offx = xoff_RA, offy = yoff_DEC)
+   # This code will create bins based on the longest and shortest baselines
+   def get_dynamics_bins(data, incl, PA, offx, offy):
+
+    #convert keywords into relevant units
+        inclr = np.radians(incl)
+        PAr = 0.5 * np.pi - np.radians(PA)
+        offx *= -np.pi / (180 * 3600)
+        offy *= -np.pi / (180 * 3600)
+
+    # change to a deprojected, rotated coordinate system
+        uprime = (data['u'] * np.cos(PAr) + data['v'] * np.sin(PAr))
+        vprime = (-data['u'] * np.sin(PAr) + data['v'] * np.cos(PAr)) * np.cos(inclr)
+    
+        rhop = np.sqrt(uprime**2 + vprime**2)/1e3
+        maxline = np.max(rhop)
+        minline = np.min(rhop)
+        bin_step = 25
+        return np.arange(minline, maxline + bin_step, bin_step), minline, maxline
+
+    dynamic_bins, minbase, maxbase = get_dynamics_bins(wtfx_ev, incl = inclination, PA = pos_angle, offx = xoff_RA, offy = yoff_DEC)
+
+    # Deproject the data based on the fit
+    deprjvs_wtfx = deproject_vis(wtfx_ev, bins = dynamic_bins, incl = inclination, PA = pos_angle, offx = xoff_RA, offy = yoff_DEC)
 
     #----------------------------------
 
@@ -104,12 +133,13 @@ for shape in shapes:
     model_ev_path = eb_fol + 'exported_vis_model' + shape
     export_vis(model_split_MS, model_ev_path)
     model_ev = np.load(model_ev_path + '.npz')
-
-    #------------ AGAIN NOTE NEW CHANGES NEED TO BE MADE
+    #---------------------------------
     deprjvs_model = deproject_vis(model_ev, bins = np.arange(0,2500, 25), incl = inclination, PA = pos_angle, offx = xoff_RA, offy = yoff_DEC)
 
-    #----------------------
+    #----------------------------------
+    deprjvs_model = deproject_vis(model_ev, bins = dynamic_bins, incl = inclination, PA = pos_angle, offx = xoff_RA, offy = yoff_DEC)
 
+    #----------------------------------
     # Plot the figure
     fig = plt.figure()
     gs=GridSpec(3, 1)
@@ -125,6 +155,7 @@ for shape in shapes:
 
     realax.set_title(targ_name)
     realax.set_ylabel('real amplitude (Jy)') # Not 100% positive about the units
+    realax.set_ylabel('real (Jy)')
     realax.xaxis.set_ticklabels([])
     realax.legend()
     
@@ -134,6 +165,7 @@ for shape in shapes:
     imgax.axhline(y=0, color='k', linestyle='--', linewidth=1)
     
     imgax.set_ylabel('img amplitude (Jy)')
+    imgax.set_ylabel('img (Jy)')
     imgax.set_xlabel('uv distance (klam)')
     
     # In order to have the img plot have the same y-axis scale as the real plot. (It's not *perfect*, but it's very close.)
@@ -141,6 +173,13 @@ for shape in shapes:
     y_bound = (ylim[1] - ylim[0])/2
     imgax.set_ylim([-y_bound/2, y_bound/2])
     
+    # Fixes x-axises
+    realax.set_xlim(left=0.33*minbase*1e3)
+    realax.set_xlim(right=maxbase*1e3)
+    imgax.set_xlim(left=0.33*minbase)
+    imgax.set_xlim(right=maxbase)
+
+
     plt.tight_layout()
     plt.savefig(eb_fol + 'amp_v_uvdist_' + shape + '.png')
     
