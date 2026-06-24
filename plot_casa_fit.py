@@ -87,12 +87,8 @@ for shape in shapes:
 
     inclination = (np.arccos(minoraxis/majoraxis) * u.rad).to(u.deg) # use trigonometry to find the inclination
 
-    #-------------_NOTE: NEED TO ADD AUTOMATED MAX BASELINE HERE INSTEAD OF 2500
-
-    #Deproject the data based on the fit
-    deprjvs_wtfx = deproject_vis(wtfx_ev, bins = np.arange(0, 2500, 25), incl = inclination, PA = pos_angle, offx = xoff_RA, offy = yoff_DEC)
    # This code will create bins based on the longest and shortest baselines
-   def get_dynamics_bins(data, incl, PA, offx, offy):
+    def get_dynamics_bins(data, incl, PA, offx, offy):
 
     #convert keywords into relevant units
         inclr = np.radians(incl)
@@ -128,9 +124,6 @@ for shape in shapes:
     export_vis(model_split_MS, model_ev_path)
     model_ev = np.load(model_ev_path + '.npz')
     #---------------------------------
-    deprjvs_model = deproject_vis(model_ev, bins = np.arange(0,2500, 25), incl = inclination, PA = pos_angle, offx = xoff_RA, offy = yoff_DEC)
-
-    #----------------------------------
     deprjvs_model = deproject_vis(model_ev, bins = dynamic_bins, incl = inclination, PA = pos_angle, offx = xoff_RA, offy = yoff_DEC)
 
     #----------------------------------
